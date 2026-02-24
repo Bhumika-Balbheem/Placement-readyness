@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/* KodNest Premium Design System - Global Styles */
+
+@theme {
+  /* Core Colors */
+  --color-background: #F7F6F3;
+  --color-foreground: #111111;
+  --color-accent: #8B0000;
+  --color-accent-hover: #6B0000;
+  --color-success: #5A7D5A;
+  --color-warning: #B8860B;
+  --color-muted: #6B6B6B;
+  --color-border: #E5E4E1;
+  --color-card: #FFFFFF;
+  
+  /* Font Families */
+  --font-serif: Georgia, Cambria, 'Times New Roman', serif;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Custom Font Sizes */
+  --font-size-heading-xl: 2.5rem;
+  --font-size-heading-lg: 2rem;
+  --font-size-heading-md: 1.5rem;
+  --font-size-body-lg: 1.125rem;
+  --font-size-body: 1rem;
+  
+  /* Custom Spacing */
+  --spacing-2: 8px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-10: 40px;
+  --spacing-16: 64px;
+  
+  /* Custom Max Width */
+  --max-width-text: 720px;
+  
+  /* Border Radius */
+  --radius-DEFAULT: 6px;
+}
+
+:root {
+  /* Spacing Scale */
+  --space-2: 8px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-10: 40px;
+  --space-16: 64px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 200ms ease-in-out;
+  
+  /* Border Radius */
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  line-height: 1.6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  color: var(--color-foreground);
+}
+
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 2rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+p {
+  max-width: 720px;
+  line-height: 1.7;
+}
+
+/* Focus States */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(139, 0, 0, 0.15);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
