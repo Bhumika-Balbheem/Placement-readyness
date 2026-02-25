@@ -26,6 +26,8 @@ const ResultsPage = dynamic(() => import('@/components/pages/ResultsPage'), { ss
 const HistoryPage = dynamic(() => import('@/components/pages/HistoryPage'), { ssr: false })
 const ResourcesPage = dynamic(() => import('@/components/pages/ResourcesPage'), { ssr: false })
 const ProfilePage = dynamic(() => import('@/components/pages/ProfilePage'), { ssr: false })
+const TestChecklistPage = dynamic(() => import('@/components/pages/TestChecklistPage'), { ssr: false })
+const ShipPage = dynamic(() => import('@/components/pages/ShipPage'), { ssr: false })
 
 function AppRoutes() {
   return (
@@ -40,6 +42,8 @@ function AppRoutes() {
         <Route path="resources" element={<ResourcesPage />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
+      <Route path="/prp/07-test" element={<TestChecklistPage />} />
+      <Route path="/prp/08-ship" element={<ShipPage />} />
     </Routes>
   )
 }
