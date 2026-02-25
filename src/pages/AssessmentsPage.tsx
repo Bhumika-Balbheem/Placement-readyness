@@ -9,6 +9,8 @@ import { generatePlan } from '@/utils/planGenerator'
 import { generateQuestions } from '@/utils/questionGenerator'
 import { calculateReadinessScore } from '@/utils/scoreCalculator'
 import { saveFullAnalysis, initializeSkillConfidenceMap } from '@/utils/storage'
+import { generateCompanyIntel } from '@/utils/companyIntel'
+import { generateRoundMapping } from '@/utils/roundMapping'
 import { AnalysisResult, SkillConfidenceMap } from '@/types/analysis'
 
 export function AssessmentsPage() {
@@ -55,6 +57,14 @@ export function AssessmentsPage() {
       jdText.length
     )
 
+    // Generate company intel
+    const companyIntel = generateCompanyIntel(company) || undefined
+
+    // Generate round mapping based on company size and skills
+    const roundMapping = companyIntel 
+      ? generateRoundMapping(companyIntel.size, extractedSkills)
+      : undefined
+
     // Create analysis result
     const result: AnalysisResult = {
       id: Date.now().toString(),
@@ -69,6 +79,8 @@ export function AssessmentsPage() {
       questions,
       readinessScore,
       adjustedReadinessScore: readinessScore,
+      companyIntel,
+      roundMapping,
     }
 
     // Save to localStorage

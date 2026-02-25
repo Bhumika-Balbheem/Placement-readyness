@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { FileText, CheckCircle, Calendar, HelpCircle, ArrowLeft, RotateCcw, Award, Download, Copy, Check, Target, Play } from 'lucide-react'
+import { FileText, CheckCircle, Calendar, HelpCircle, ArrowLeft, RotateCcw, Award, Download, Copy, Check, Target, Play, Building2, Briefcase, Users, Lightbulb, MapPin, Info } from 'lucide-react'
 import { getCurrentAnalysis, getAnalysisById, updateAnalysisSkillConfidence } from '@/utils/storage'
 import { getScoreLabel, getScoreColor, calculateAdjustedReadinessScore } from '@/utils/scoreCalculator'
+import { getSizeBadgeColor } from '@/utils/companyIntel'
 import { AnalysisResult, SkillConfidenceMap, SkillConfidence } from '@/types/analysis'
 
 export function ResultsPage() {
@@ -186,6 +187,60 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
         </div>
       </div>
 
+      {/* Company Intel Block */}
+      {analysis.companyIntel && (
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Building2 className="w-5 h-5 text-[hsl(245,58%,51%)]" />
+            <h3 className="text-lg font-semibold text-gray-900">Company Intel</h3>
+            <span className="text-xs text-gray-400 ml-2 flex items-center gap-1">
+              <Info className="w-3 h-3" />
+              Demo Mode: Generated heuristically
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            {/* Company Name */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                <Building2 className="w-4 h-4" />
+                Company
+              </div>
+              <p className="font-semibold text-gray-900">{analysis.companyIntel.name}</p>
+            </div>
+            
+            {/* Industry */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                <Briefcase className="w-4 h-4" />
+                Industry
+              </div>
+              <p className="font-semibold text-gray-900">{analysis.companyIntel.industry}</p>
+            </div>
+            
+            {/* Size */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                <Users className="w-4 h-4" />
+                Size
+              </div>
+              <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full border ${getSizeBadgeColor(analysis.companyIntel.size)}`}>
+                {analysis.companyIntel.sizeLabel}
+              </span>
+            </div>
+            
+            {/* Hiring Focus */}
+            <div className="p-4 bg-gray-50 rounded-lg md:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+                <Lightbulb className="w-4 h-4" />
+                Typical Hiring Focus
+              </div>
+              <p className="text-sm text-gray-700">{analysis.companyIntel.hiringFocus}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Readiness Score */}
       <div className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
         <div className="flex flex-col sm:flex-row items-center gap-8">
@@ -305,6 +360,52 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
           </div>
         </div>
       </div>
+
+      {/* Round Mapping Timeline */}
+      {analysis.roundMapping && analysis.roundMapping.length > 0 && (
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-[hsl(245,58%,51%)]" />
+            Interview Round Mapping
+          </h3>
+          
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+            
+            {/* Round items */}
+            <div className="space-y-6">
+              {analysis.roundMapping.map((round, index) => (
+                <div key={round.round} className="relative flex gap-4">
+                  {/* Round number/badge */}
+                  <div className="relative z-10 flex-shrink-0 w-12 h-12 bg-[hsl(245,58%,51%)] text-white rounded-full flex items-center justify-center font-bold shadow-md">
+                    {round.round}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 pb-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-1">
+                        {round.title}
+                      </h4>
+                      <p className="text-gray-600 text-sm mb-3">
+                        {round.description}
+                      </p>
+                      <div className="flex items-start gap-2 p-3 bg-indigo-50 rounded-lg">
+                        <Lightbulb className="w-4 h-4 text-[hsl(245,58%,51%)] flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-indigo-700">
+                          <span className="font-medium">Why this matters: </span>
+                          {round.whyItMatters}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Export Tools */}
       <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">

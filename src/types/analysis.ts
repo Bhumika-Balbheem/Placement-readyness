@@ -44,6 +44,8 @@ export interface AnalysisResult {
   questions: string[]
   readinessScore: number
   adjustedReadinessScore: number
+  companyIntel?: CompanyIntel
+  roundMapping?: RoundMapping[]
 }
 
 export interface HistoryEntry {
@@ -52,4 +54,21 @@ export interface HistoryEntry {
   company: string
   role: string
   readinessScore: number
+}
+
+export type CompanySize = 'startup' | 'mid-size' | 'enterprise'
+
+export interface CompanyIntel {
+  name: string
+  industry: string
+  size: CompanySize
+  sizeLabel: string
+  hiringFocus: string
+}
+
+export interface RoundMapping {
+  round: number
+  title: string
+  description: string
+  whyItMatters: string
 }
