@@ -1,12 +1,13 @@
 'use client'
 
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Code2, ClipboardCheck, BookOpen, User } from 'lucide-react'
+import { LayoutDashboard, Code2, ClipboardCheck, BookOpen, User, History } from 'lucide-react'
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/dashboard/practice', label: 'Practice', icon: Code2 },
   { path: '/dashboard/assessments', label: 'Assessments', icon: ClipboardCheck },
+  { path: '/dashboard/history', label: 'History', icon: History },
   { path: '/dashboard/resources', label: 'Resources', icon: BookOpen },
   { path: '/dashboard/profile', label: 'Profile', icon: User },
 ]
