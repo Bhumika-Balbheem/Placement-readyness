@@ -1,14 +1,19 @@
 'use client'
 
-import { LayoutDashboard, TrendingUp, Target, Award } from 'lucide-react'
+import { LayoutDashboard } from 'lucide-react'
+import { OverallReadiness } from '@/components/dashboard/OverallReadiness'
+import { SkillBreakdown } from '@/components/dashboard/SkillBreakdown'
+import { ContinuePractice } from '@/components/dashboard/ContinuePractice'
+import { WeeklyGoals } from '@/components/dashboard/WeeklyGoals'
+import { UpcomingAssessments } from '@/components/dashboard/UpcomingAssessments'
+
+const upcomingAssessments = [
+  { id: '1', title: 'DSA Mock Test', date: 'Tomorrow', time: '10:00 AM' },
+  { id: '2', title: 'System Design Review', date: 'Wed', time: '2:00 PM' },
+  { id: '3', title: 'HR Interview Prep', date: 'Friday', time: '11:00 AM' },
+]
 
 export function DashboardPage() {
-  const stats = [
-    { label: 'Problems Solved', value: '42', icon: Target, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Current Streak', value: '7 days', icon: TrendingUp, color: 'bg-green-50 text-green-600' },
-    { label: 'Rank', value: '#1,234', icon: Award, color: 'bg-purple-50 text-purple-600' },
-  ]
-
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -20,27 +25,37 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.label} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.color}`}>
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* 2-Column Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Overall Readiness */}
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Readiness</h3>
+          <OverallReadiness score={72} />
+        </div>
 
-      {/* Placeholder Content */}
-      <div className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-        <p className="text-gray-600">Your recent coding activity and progress will appear here.</p>
+        {/* Skill Breakdown */}
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Skill Breakdown</h3>
+          <SkillBreakdown />
+        </div>
+
+        {/* Continue Practice */}
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Continue Practice</h3>
+          <ContinuePractice topic="Dynamic Programming" completed={3} total={10} />
+        </div>
+
+        {/* Weekly Goals */}
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Goals</h3>
+          <WeeklyGoals solved={12} target={20} activeDays={[true, true, false, true, true, false, false]} />
+        </div>
+
+        {/* Upcoming Assessments - Full width on mobile, spans 2 columns on large screens */}
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm lg:col-span-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Assessments</h3>
+          <UpcomingAssessments assessments={upcomingAssessments} />
+        </div>
       </div>
     </div>
   )
