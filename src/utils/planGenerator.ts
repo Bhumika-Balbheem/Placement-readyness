@@ -1,11 +1,10 @@
-import { DayPlan } from '@/types/analysis'
-import { ExtractedSkills } from '@/types/analysis'
+import { Plan7DayItem, ExtractedSkills } from '@/types/analysis'
 
-export function generatePlan(skills: ExtractedSkills): DayPlan[] {
-  const plan: DayPlan[] = []
+export function generatePlan(skills: ExtractedSkills): Plan7DayItem[] {
+  const plan: Plan7DayItem[] = []
   const hasWeb = skills.web.length > 0
   const hasData = skills.data.length > 0
-  const hasCloud = skills.cloudDevOps.length > 0
+  const hasCloud = skills.cloud.length > 0
   const hasTesting = skills.testing.length > 0
 
   // Day 1-2: Basics + Core CS
@@ -18,7 +17,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     day1Tasks.push('Review OOP principles: encapsulation, inheritance, polymorphism')
   }
 
-  plan.push({ day: 1, title: 'Basics + Core CS - Part 1', tasks: day1Tasks })
+  plan.push({ day: 1, focus: 'Basics + Core CS - Part 1', tasks: day1Tasks })
 
   const day2Tasks = [
     'Study advanced data structures (trees, graphs, heaps)',
@@ -32,7 +31,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     day2Tasks.push('Study OS concepts: processes, threads, memory management')
   }
 
-  plan.push({ day: 2, title: 'Basics + Core CS - Part 2', tasks: day2Tasks })
+  plan.push({ day: 2, focus: 'Basics + Core CS - Part 2', tasks: day2Tasks })
 
   // Day 3-4: DSA + Coding Practice
   const day3Tasks = [
@@ -44,7 +43,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     day3Tasks.push(`Review ${skills.languages[0]} specific optimizations and best practices`)
   }
 
-  plan.push({ day: 3, title: 'DSA + Coding - Part 1', tasks: day3Tasks })
+  plan.push({ day: 3, focus: 'DSA + Coding - Part 1', tasks: day3Tasks })
 
   const day4Tasks = [
     'Study dynamic programming patterns',
@@ -53,7 +52,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     'Review recursion and backtracking techniques',
   ]
 
-  plan.push({ day: 4, title: 'DSA + Coding - Part 2', tasks: day4Tasks })
+  plan.push({ day: 4, focus: 'DSA + Coding - Part 2', tasks: day4Tasks })
 
   // Day 5: Project + Resume Alignment
   const day5Tasks = [
@@ -71,7 +70,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     day5Tasks.push('Document deployment and infrastructure details')
   }
 
-  plan.push({ day: 5, title: 'Project + Resume Alignment', tasks: day5Tasks })
+  plan.push({ day: 5, focus: 'Project + Resume Alignment', tasks: day5Tasks })
 
   // Day 6: Mock Interview Questions
   const day6Tasks = [
@@ -86,7 +85,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     day6Tasks.push('Review testing strategies and frameworks')
   }
 
-  plan.push({ day: 6, title: 'Mock Interview Questions', tasks: day6Tasks })
+  plan.push({ day: 6, focus: 'Mock Interview Questions', tasks: day6Tasks })
 
   // Day 7: Revision + Weak Areas
   const day7Tasks = [
@@ -100,7 +99,7 @@ export function generatePlan(skills: ExtractedSkills): DayPlan[] {
     day7Tasks.push(`Quick revision of ${skills.languages[0]} syntax and common pitfalls`)
   }
 
-  plan.push({ day: 7, title: 'Revision + Weak Areas', tasks: day7Tasks })
+  plan.push({ day: 7, focus: 'Revision + Weak Areas', tasks: day7Tasks })
 
   return plan
 }

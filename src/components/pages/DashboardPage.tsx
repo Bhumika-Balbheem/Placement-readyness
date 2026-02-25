@@ -13,7 +13,7 @@ const upcomingAssessments = [
   { id: '3', title: 'HR Interview Prep', date: 'Friday', time: '11:00 AM' },
 ]
 
-export function DashboardPage() {
+export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}

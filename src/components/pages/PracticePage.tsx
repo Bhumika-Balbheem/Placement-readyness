@@ -2,7 +2,7 @@
 
 import { Code2 } from 'lucide-react'
 
-export function PracticePage() {
+export default function PracticePage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}

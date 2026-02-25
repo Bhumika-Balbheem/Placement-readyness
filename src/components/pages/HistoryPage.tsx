@@ -2,19 +2,30 @@
 
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { History, Trash2, ExternalLink, FileText } from 'lucide-react'
-import { getHistory, deleteHistoryEntry, clearHistory } from '@/utils/storage'
+import { History, Trash2, ExternalLink, FileText, AlertTriangle } from 'lucide-react'
+import { getHistory, deleteHistoryEntry, clearHistory, hasCorruptionWarning, clearCorruptionWarning } from '@/utils/storage'
 import { getScoreColor } from '@/utils/scoreCalculator'
 import { HistoryEntry } from '@/types/analysis'
 
-export function HistoryPage() {
+export default function HistoryPage() {
   const navigate = useNavigate()
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCorruptionWarning, setShowCorruptionWarning] = useState(false)
 
   useEffect(() => {
     const entries = getHistory()
     setHistory(entries)
+    
+    // Check for corruption warning
+    const hasWarning = hasCorruptionWarning()
+    setShowCorruptionWarning(hasWarning)
+    
+    // Clear the warning flag after showing
+    if (hasWarning) {
+      clearCorruptionWarning()
+    }
+    
     setLoading(false)
   }, [])
 
@@ -64,6 +75,17 @@ export function HistoryPage() {
         )}
       </div>
 
+      {/* Corruption Warning */}
+      {showCorruptionWarning && (
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-amber-800 font-medium">One saved entry couldn't be loaded.</p>
+            <p className="text-amber-700 text-sm">Create a new analysis to continue.</p>
+          </div>
+        </div>
+      )}
+
       {/* History List */}
       {history.length > 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -77,7 +99,7 @@ export function HistoryPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {entry.company}
+                      {entry.company || 'Unknown Company'}
                     </h3>
                     <span className="text-sm text-gray-500">
                       {new Date(entry.createdAt).toLocaleDateString('en-US', {
@@ -87,7 +109,7 @@ export function HistoryPage() {
                       })}
                     </span>
                   </div>
-                  <p className="text-gray-600">{entry.role}</p>
+                  <p className="text-gray-600">{entry.role || 'Unknown Role'}</p>
                 </div>
 
                 {/* Score */}

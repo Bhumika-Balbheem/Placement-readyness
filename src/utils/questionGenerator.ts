@@ -144,7 +144,7 @@ export function generateQuestions(skills: ExtractedSkills): string[] {
   }
 
   // Cloud/DevOps
-  if (skills.cloudDevOps.includes('AWS') || skills.cloudDevOps.includes('Azure') || skills.cloudDevOps.includes('GCP')) {
+  if (skills.cloud.includes('AWS') || skills.cloud.includes('Azure') || skills.cloud.includes('GCP')) {
     questions.push(
       'Explain the benefits of cloud computing over on-premise.',
       'What is auto-scaling and how does it work?',
@@ -153,7 +153,7 @@ export function generateQuestions(skills: ExtractedSkills): string[] {
     )
   }
 
-  if (skills.cloudDevOps.includes('Docker')) {
+  if (skills.cloud.includes('Docker')) {
     questions.push(
       'What is containerization and how does Docker work?',
       'Explain the difference between images and containers.',
@@ -162,7 +162,7 @@ export function generateQuestions(skills: ExtractedSkills): string[] {
     )
   }
 
-  if (skills.cloudDevOps.includes('Kubernetes')) {
+  if (skills.cloud.includes('Kubernetes')) {
     questions.push(
       'Explain Kubernetes architecture and its components.',
       'What are pods, deployments, and services?',
@@ -171,7 +171,7 @@ export function generateQuestions(skills: ExtractedSkills): string[] {
     )
   }
 
-  if (skills.cloudDevOps.includes('CI/CD')) {
+  if (skills.cloud.includes('CI/CD')) {
     questions.push(
       'What is CI/CD and why is it important?',
       'Explain the difference between continuous integration and continuous deployment.',

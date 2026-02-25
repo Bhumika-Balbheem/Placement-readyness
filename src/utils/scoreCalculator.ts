@@ -1,6 +1,15 @@
 import { ExtractedSkills, SkillConfidenceMap } from '@/types/analysis'
 import { getDetectedCategories } from './skillExtractor'
 
+const MAX_SCORE = 100
+const MIN_SCORE = 0
+const SCORE_ADJUSTMENT = 2
+
+/**
+ * Calculates base readiness score from JD analysis
+ * This score is computed ONLY ONCE during initial analysis
+ * @returns baseScore (0-100)
+ */
 export function calculateReadinessScore(
   skills: ExtractedSkills,
   company: string,
@@ -29,25 +38,43 @@ export function calculateReadinessScore(
   }
 
   // Cap at 100
-  return Math.min(score, 100)
+  return Math.min(score, MAX_SCORE)
 }
 
+/**
+ * Calculates final score based on base score and skill confidence map
+ * Score changes by +/-2 per skill toggle, clamped 0-100
+ * @param baseScore - The original score from JD analysis
+ * @param skillConfidenceMap - Map of skill to confidence level
+ * @returns finalScore (0-100)
+ */
+export function calculateFinalScore(
+  baseScore: number,
+  skillConfidenceMap: SkillConfidenceMap
+): number {
+  let adjustment = 0
+  
+  Object.values(skillConfidenceMap).forEach((confidence) => {
+    if (confidence === 'know') {
+      adjustment += SCORE_ADJUSTMENT
+    } else {
+      adjustment -= SCORE_ADJUSTMENT
+    }
+  })
+  
+  const finalScore = baseScore + adjustment
+  return Math.max(MIN_SCORE, Math.min(MAX_SCORE, finalScore))
+}
+
+/**
+ * @deprecated Use calculateFinalScore instead
+ * Maintained for backward compatibility
+ */
 export function calculateAdjustedReadinessScore(
   baseScore: number,
   skillConfidenceMap: SkillConfidenceMap
 ): number {
-  let adjustedScore = baseScore
-
-  Object.values(skillConfidenceMap).forEach(confidence => {
-    if (confidence === 'know') {
-      adjustedScore += 2
-    } else {
-      adjustedScore -= 2
-    }
-  })
-
-  // Bounds: 0-100
-  return Math.max(0, Math.min(100, adjustedScore))
+  return calculateFinalScore(baseScore, skillConfidenceMap)
 }
 
 export function getScoreLabel(score: number): string {

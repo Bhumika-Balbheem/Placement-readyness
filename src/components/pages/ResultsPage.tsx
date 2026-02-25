@@ -4,11 +4,11 @@ import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { FileText, CheckCircle, Calendar, HelpCircle, ArrowLeft, RotateCcw, Award, Download, Copy, Check, Target, Play, Building2, Briefcase, Users, Lightbulb, MapPin, Info } from 'lucide-react'
 import { getCurrentAnalysis, getAnalysisById, updateAnalysisSkillConfidence } from '@/utils/storage'
-import { getScoreLabel, getScoreColor, calculateAdjustedReadinessScore } from '@/utils/scoreCalculator'
+import { getScoreLabel, getScoreColor } from '@/utils/scoreCalculator'
 import { getSizeBadgeColor } from '@/utils/companyIntel'
 import { AnalysisResult, SkillConfidenceMap, SkillConfidence } from '@/types/analysis'
 
-export function ResultsPage() {
+export default function ResultsPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
@@ -30,7 +30,8 @@ export function ResultsPage() {
     if (result) {
       setAnalysis(result)
       setSkillConfidenceMap(result.skillConfidenceMap || {})
-      setAdjustedScore(result.adjustedReadinessScore || result.readinessScore)
+      // Use finalScore from stored result
+      setAdjustedScore(result.finalScore)
     }
     setLoading(false)
   }, [searchParams])
@@ -43,12 +44,16 @@ export function ResultsPage() {
     
     setSkillConfidenceMap(newMap)
     
-    // Calculate new adjusted score
-    const newScore = calculateAdjustedReadinessScore(analysis.readinessScore, newMap)
-    setAdjustedScore(newScore)
+    // Persist to localStorage - finalScore will be recalculated based on baseScore
+    updateAnalysisSkillConfidence(analysis.id, newMap)
     
-    // Persist to localStorage
-    updateAnalysisSkillConfidence(analysis.id, newMap, newScore)
+    // Calculate new score locally for immediate feedback
+    // +2 for 'know', -2 for 'practice'
+    const adjustment = Object.values(newMap).reduce((acc, conf) => {
+      return acc + (conf === 'know' ? 2 : -2)
+    }, 0)
+    const newScore = Math.max(0, Math.min(100, analysis.baseScore + adjustment))
+    setAdjustedScore(newScore)
   }, [analysis, skillConfidenceMap])
 
   const copyToClipboard = useCallback((text: string, section: string) => {
@@ -64,8 +69,8 @@ export function ResultsPage() {
 PLACEMENT READINESS ANALYSIS
 ============================
 
-Company: ${analysis.company}
-Role: ${analysis.role}
+Company: ${analysis.company || 'Not specified'}
+Role: ${analysis.role || 'Not specified'}
 Date: ${new Date(analysis.createdAt).toLocaleDateString()}
 Readiness Score: ${adjustedScore}/100
 
@@ -78,16 +83,16 @@ ${Object.entries(analysis.extractedSkills)
 
 7-DAY PREPARATION PLAN
 ----------------------
-${analysis.plan.map(day => `
-Day ${day.day}: ${day.title}
+${analysis.plan7Days.map(day => `
+Day ${day.day}: ${day.focus}
 ${day.tasks.map(task => `- ${task}`).join('\n')}
 `).join('\n')}
 
 ROUND-WISE CHECKLIST
 --------------------
 ${analysis.checklist.map(round => `
-Round ${round.round}: ${round.title}
-${round.items.map(item => `- ${item.text}`).join('\n')}
+${round.roundTitle}
+${round.items.map(item => `- ${item}`).join('\n')}
 `).join('\n')}
 
 INTERVIEW QUESTIONS
@@ -130,7 +135,7 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
     )
   }
 
-  const { extractedSkills, readinessScore, checklist, plan, questions, company, role, createdAt } = analysis
+  const { extractedSkills, baseScore, checklist, plan7Days, questions, company, role, createdAt } = analysis
 
   // Get all skills for weak skills list
   const allSkills = [
@@ -138,8 +143,9 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
     ...extractedSkills.languages,
     ...extractedSkills.web,
     ...extractedSkills.data,
-    ...extractedSkills.cloudDevOps,
+    ...extractedSkills.cloud,
     ...extractedSkills.testing,
+    ...extractedSkills.other,
   ]
 
   // Get weak skills (marked as practice)
@@ -151,8 +157,9 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
     { name: 'Languages', skills: extractedSkills.languages, color: 'bg-green-100 text-green-700' },
     { name: 'Web', skills: extractedSkills.web, color: 'bg-purple-100 text-purple-700' },
     { name: 'Data', skills: extractedSkills.data, color: 'bg-orange-100 text-orange-700' },
-    { name: 'Cloud/DevOps', skills: extractedSkills.cloudDevOps, color: 'bg-cyan-100 text-cyan-700' },
+    { name: 'Cloud/DevOps', skills: extractedSkills.cloud, color: 'bg-cyan-100 text-cyan-700' },
     { name: 'Testing', skills: extractedSkills.testing, color: 'bg-pink-100 text-pink-700' },
+    { name: 'Other', skills: extractedSkills.other, color: 'bg-gray-100 text-gray-700' },
   ].filter(cat => cat.skills.length > 0)
 
   const hasAnySkills = skillCategories.length > 0
@@ -281,12 +288,12 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
               </span>
             </div>
             <p className="text-gray-600 max-w-md">
-              Base score: {readinessScore}. Adjusted based on your self-assessment.
+              Base score: {baseScore}. Adjusted based on your self-assessment.
               Mark skills as "I know this" to increase your score.
             </p>
-            {adjustedScore !== readinessScore && (
-              <p className={`text-sm font-medium mt-2 ${adjustedScore > readinessScore ? 'text-green-600' : 'text-red-600'}`}>
-                {adjustedScore > readinessScore ? '+' : ''}{adjustedScore - readinessScore} from self-assessment
+            {adjustedScore !== baseScore && (
+              <p className={`text-sm font-medium mt-2 ${adjustedScore > baseScore ? 'text-green-600' : 'text-red-600'}`}>
+                {adjustedScore > baseScore ? '+' : ''}{adjustedScore - baseScore} from self-assessment
               </p>
             )}
           </div>
@@ -376,20 +383,20 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
             {/* Round items */}
             <div className="space-y-6">
               {analysis.roundMapping.map((round, index) => (
-                <div key={round.round} className="relative flex gap-4">
+                <div key={index} className="relative flex gap-4">
                   {/* Round number/badge */}
                   <div className="relative z-10 flex-shrink-0 w-12 h-12 bg-[hsl(245,58%,51%)] text-white rounded-full flex items-center justify-center font-bold shadow-md">
-                    {round.round}
+                    {index + 1}
                   </div>
                   
                   {/* Content */}
                   <div className="flex-1 pb-6">
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-gray-900 mb-1">
-                        {round.title}
+                        {round.roundTitle}
                       </h4>
                       <p className="text-gray-600 text-sm mb-3">
-                        {round.description}
+                        {round.focusAreas.join(', ')}
                       </p>
                       <div className="flex items-start gap-2 p-3 bg-indigo-50 rounded-lg">
                         <Lightbulb className="w-4 h-4 text-[hsl(245,58%,51%)] flex-shrink-0 mt-0.5" />
@@ -412,14 +419,14 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Export Tools</h3>
         <div className="flex flex-wrap gap-3">
           <button
-            onClick={() => copyToClipboard(plan.map(d => `Day ${d.day}: ${d.title}\n${d.tasks.map(t => `- ${t}`).join('\n')}`).join('\n\n'), 'plan')}
+            onClick={() => copyToClipboard(plan7Days.map(d => `Day ${d.day}: ${d.focus}\n${d.tasks.map(t => `- ${t}`).join('\n')}`).join('\n\n'), 'plan')}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-[hsl(245,58%,51%)] font-medium rounded-lg hover:bg-indigo-100 transition-colors"
           >
             {copiedSection === 'plan' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             Copy 7-Day Plan
           </button>
           <button
-            onClick={() => copyToClipboard(checklist.map(r => `Round ${r.round}: ${r.title}\n${r.items.map(i => `- ${i.text}`).join('\n')}`).join('\n\n'), 'checklist')}
+            onClick={() => copyToClipboard(checklist.map(r => `${r.roundTitle}\n${r.items.map(i => `- ${i}`).join('\n')}`).join('\n\n'), 'checklist')}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-[hsl(245,58%,51%)] font-medium rounded-lg hover:bg-indigo-100 transition-colors"
           >
             {copiedSection === 'checklist' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -449,16 +456,16 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
           Round-wise Preparation Checklist
         </h3>
         <div className="space-y-6">
-          {checklist.map((round) => (
-            <div key={round.round} className="border-l-4 border-[hsl(245,58%,51%)] pl-4">
+          {checklist.map((round, idx) => (
+            <div key={idx} className="border-l-4 border-[hsl(245,58%,51%)] pl-4">
               <h4 className="font-semibold text-gray-900 mb-2">
-                Round {round.round}: {round.title}
+                {round.roundTitle}
               </h4>
               <ul className="space-y-2">
-                {round.items.map((item) => (
-                  <li key={item.id} className="flex items-start gap-2 text-gray-600">
+                {round.items.map((item, itemIdx) => (
+                  <li key={itemIdx} className="flex items-start gap-2 text-gray-600">
                     <span className="text-[hsl(245,58%,51%)] mt-1">•</span>
-                    {item.text}
+                    {item}
                   </li>
                 ))}
               </ul>
@@ -474,10 +481,10 @@ ${analysis.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
           7-Day Preparation Plan
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {plan.map((day) => (
+          {plan7Days.map((day) => (
             <div key={day.day} className="p-4 bg-gray-50 rounded-lg">
               <h4 className="font-semibold text-gray-900 mb-2">
-                Day {day.day}: {day.title}
+                Day {day.day}: {day.focus}
               </h4>
               <ul className="space-y-1">
                 {day.tasks.map((task, idx) => (

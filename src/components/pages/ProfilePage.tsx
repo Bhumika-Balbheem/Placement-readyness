@@ -2,7 +2,7 @@
 
 import { User } from 'lucide-react'
 
-export function ProfilePage() {
+export default function ProfilePage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}

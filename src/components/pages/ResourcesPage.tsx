@@ -2,7 +2,7 @@
 
 import { BookOpen } from 'lucide-react'
 
-export function ResourcesPage() {
+export default function ResourcesPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}

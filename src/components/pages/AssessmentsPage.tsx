@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ClipboardCheck, Building2, Briefcase, FileText, Sparkles } from 'lucide-react'
+import { ClipboardCheck, Building2, Briefcase, FileText, Sparkles, AlertTriangle } from 'lucide-react'
 import { extractSkills } from '@/utils/skillExtractor'
 import { generateChecklist } from '@/utils/checklistGenerator'
 import { generatePlan } from '@/utils/planGenerator'
@@ -13,17 +13,26 @@ import { generateCompanyIntel } from '@/utils/companyIntel'
 import { generateRoundMapping } from '@/utils/roundMapping'
 import { AnalysisResult, SkillConfidenceMap } from '@/types/analysis'
 
-export function AssessmentsPage() {
+const MIN_JD_LENGTH = 200
+
+export default function AssessmentsPage() {
   const navigate = useNavigate()
   const [company, setCompany] = useState('')
   const [role, setRole] = useState('')
   const [jdText, setJdText] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [showShortWarning, setShowShortWarning] = useState(false)
+
+  const handleJdChange = (value: string) => {
+    setJdText(value)
+    setShowShortWarning(value.length > 0 && value.length < MIN_JD_LENGTH)
+  }
 
   const handleAnalyze = async () => {
     if (!jdText.trim()) return
 
     setIsAnalyzing(true)
+    setShowShortWarning(false)
 
     // Simulate processing delay for better UX
     await new Promise(resolve => setTimeout(resolve, 800))
@@ -37,8 +46,9 @@ export function AssessmentsPage() {
       ...extractedSkills.languages,
       ...extractedSkills.web,
       ...extractedSkills.data,
-      ...extractedSkills.cloudDevOps,
+      ...extractedSkills.cloud,
       ...extractedSkills.testing,
+      ...extractedSkills.other,
     ]
 
     // Initialize skill confidence map (default: practice)
@@ -49,8 +59,8 @@ export function AssessmentsPage() {
     const plan = generatePlan(extractedSkills)
     const questions = generateQuestions(extractedSkills)
 
-    // Calculate readiness score
-    const readinessScore = calculateReadinessScore(
+    // Calculate base readiness score (computed only on analyze)
+    const baseScore = calculateReadinessScore(
       extractedSkills,
       company,
       role,
@@ -63,24 +73,37 @@ export function AssessmentsPage() {
     // Generate round mapping based on company size and skills
     const roundMapping = companyIntel 
       ? generateRoundMapping(companyIntel.size, extractedSkills)
-      : undefined
+      : []
 
-    // Create analysis result
+    // Create analysis result with strict schema
+    const now = new Date().toISOString()
     const result: AnalysisResult = {
+      // Identity & Metadata
       id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      company: company || 'Unknown Company',
-      role: role || 'Unknown Role',
+      createdAt: now,
+      updatedAt: now,
+      
+      // Input Fields
+      company: company || '',
+      role: role || '',
       jdText,
+      
+      // Extracted Data
       extractedSkills,
-      skillConfidenceMap,
-      plan,
-      checklist,
-      questions,
-      readinessScore,
-      adjustedReadinessScore: readinessScore,
-      companyIntel,
+      
+      // Generated Outputs
       roundMapping,
+      checklist,
+      plan7Days: plan,
+      questions,
+      
+      // Scoring
+      baseScore,
+      skillConfidenceMap,
+      finalScore: baseScore,
+      
+      // Optional Company Intel
+      companyIntel,
     }
 
     // Save to localStorage
@@ -146,14 +169,26 @@ export function AssessmentsPage() {
           </label>
           <textarea
             value={jdText}
-            onChange={(e) => setJdText(e.target.value)}
+            onChange={(e) => handleJdChange(e.target.value)}
             placeholder="Paste the full job description here. Include details about required skills, technologies, and responsibilities..."
             rows={12}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(245,58%,51%)] focus:border-transparent resize-y"
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(245,58%,51%)] focus:border-transparent resize-y ${
+              showShortWarning ? 'border-amber-400 bg-amber-50/30' : 'border-gray-200'
+            }`}
           />
           <p className="text-xs text-gray-500">
             {jdText.length} characters • We detect skills like DSA, React, Python, AWS, SQL, etc.
           </p>
+          
+          {/* Short JD Warning */}
+          {showShortWarning && (
+            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-700">
+                This JD is too short to analyze deeply. Paste full JD for better output.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Analyze Button */}

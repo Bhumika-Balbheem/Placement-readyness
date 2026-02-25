@@ -5,8 +5,19 @@ const skillCategories = {
   languages: ['Java', 'Python', 'JavaScript', 'TypeScript', 'C', 'C++', 'C#', 'Go'],
   web: ['React', 'Next.js', 'Node.js', 'Express', 'REST', 'GraphQL'],
   data: ['SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis'],
-  cloudDevOps: ['AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'CI/CD', 'Linux'],
+  cloud: ['AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'CI/CD', 'Linux'],
   testing: ['Selenium', 'Cypress', 'Playwright', 'JUnit', 'PyTest'],
+}
+
+// Default skills when extraction returns empty
+const DEFAULT_SKILLS: ExtractedSkills = {
+  coreCS: [],
+  languages: [],
+  web: [],
+  data: [],
+  cloud: [],
+  testing: [],
+  other: ['Communication', 'Problem solving', 'Basic coding', 'Projects'],
 }
 
 export function extractSkills(jdText: string): ExtractedSkills {
@@ -16,8 +27,9 @@ export function extractSkills(jdText: string): ExtractedSkills {
     languages: [],
     web: [],
     data: [],
-    cloudDevOps: [],
+    cloud: [],
     testing: [],
+    other: [],
   }
 
   // Check each category
@@ -47,19 +59,24 @@ export function extractSkills(jdText: string): ExtractedSkills {
     if (text.includes(skill.toLowerCase())) skills.data.push(skill)
   })
 
-  skillCategories.cloudDevOps.forEach(skill => {
-    if (text.includes(skill.toLowerCase())) skills.cloudDevOps.push(skill)
+  skillCategories.cloud.forEach(skill => {
+    if (text.includes(skill.toLowerCase())) skills.cloud.push(skill)
   })
 
   skillCategories.testing.forEach(skill => {
     if (text.includes(skill.toLowerCase())) skills.testing.push(skill)
   })
 
+  // Apply default skills if no skills detected
+  if (!hasAnySkills(skills)) {
+    return { ...DEFAULT_SKILLS }
+  }
+
   return skills
 }
 
 export function hasAnySkills(skills: ExtractedSkills): boolean {
-  return Object.values(skills).some(arr => arr.length > 0)
+  return Object.values(skills).some(arr => Array.isArray(arr) && arr.length > 0)
 }
 
 export function getDetectedCategories(skills: ExtractedSkills): string[] {
@@ -68,7 +85,8 @@ export function getDetectedCategories(skills: ExtractedSkills): string[] {
   if (skills.languages.length > 0) categories.push('languages')
   if (skills.web.length > 0) categories.push('web')
   if (skills.data.length > 0) categories.push('data')
-  if (skills.cloudDevOps.length > 0) categories.push('cloudDevOps')
+  if (skills.cloud.length > 0) categories.push('cloud')
   if (skills.testing.length > 0) categories.push('testing')
+  if (skills.other && skills.other.length > 0) categories.push('other')
   return categories
 }
