@@ -8,8 +8,8 @@ import { generateChecklist } from '@/utils/checklistGenerator'
 import { generatePlan } from '@/utils/planGenerator'
 import { generateQuestions } from '@/utils/questionGenerator'
 import { calculateReadinessScore } from '@/utils/scoreCalculator'
-import { saveFullAnalysis } from '@/utils/storage'
-import { AnalysisResult } from '@/types/analysis'
+import { saveFullAnalysis, initializeSkillConfidenceMap } from '@/utils/storage'
+import { AnalysisResult, SkillConfidenceMap } from '@/types/analysis'
 
 export function AssessmentsPage() {
   const navigate = useNavigate()
@@ -28,6 +28,19 @@ export function AssessmentsPage() {
 
     // Extract skills
     const extractedSkills = extractSkills(jdText)
+
+    // Get all skills as flat array for confidence map
+    const allSkills = [
+      ...extractedSkills.coreCS,
+      ...extractedSkills.languages,
+      ...extractedSkills.web,
+      ...extractedSkills.data,
+      ...extractedSkills.cloudDevOps,
+      ...extractedSkills.testing,
+    ]
+
+    // Initialize skill confidence map (default: practice)
+    const skillConfidenceMap = initializeSkillConfidenceMap(allSkills)
 
     // Generate outputs
     const checklist = generateChecklist(extractedSkills)
@@ -50,10 +63,12 @@ export function AssessmentsPage() {
       role: role || 'Unknown Role',
       jdText,
       extractedSkills,
+      skillConfidenceMap,
       plan,
       checklist,
       questions,
       readinessScore,
+      adjustedReadinessScore: readinessScore,
     }
 
     // Save to localStorage

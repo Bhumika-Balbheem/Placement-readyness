@@ -7,6 +7,12 @@ export interface ExtractedSkills {
   testing: string[]
 }
 
+export type SkillConfidence = 'know' | 'practice'
+
+export interface SkillConfidenceMap {
+  [skill: string]: SkillConfidence
+}
+
 export interface ChecklistItem {
   id: string
   text: string
@@ -32,10 +38,12 @@ export interface AnalysisResult {
   role: string
   jdText: string
   extractedSkills: ExtractedSkills
+  skillConfidenceMap: SkillConfidenceMap
   plan: DayPlan[]
   checklist: RoundChecklist[]
   questions: string[]
   readinessScore: number
+  adjustedReadinessScore: number
 }
 
 export interface HistoryEntry {

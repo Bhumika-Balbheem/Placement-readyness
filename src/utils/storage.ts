@@ -1,4 +1,4 @@
-import { AnalysisResult, HistoryEntry } from '@/types/analysis'
+import { AnalysisResult, HistoryEntry, SkillConfidenceMap, SkillConfidence } from '@/types/analysis'
 
 const STORAGE_KEY = 'placement_readiness_history'
 const CURRENT_ANALYSIS_KEY = 'placement_current_analysis'
@@ -114,4 +114,51 @@ export function deleteHistoryEntry(id: string): void {
   // Remove full analysis
   const fullResultsKey = `placement_analysis_${id}`
   localStorage.removeItem(fullResultsKey)
+}
+
+export function updateAnalysisSkillConfidence(
+  id: string,
+  skillConfidenceMap: SkillConfidenceMap,
+  adjustedReadinessScore: number
+): void {
+  if (typeof window === 'undefined') return
+
+  // Update full analysis
+  const fullResultsKey = `placement_analysis_${id}`
+  const stored = localStorage.getItem(fullResultsKey)
+  
+  if (stored) {
+    try {
+      const analysis: AnalysisResult = JSON.parse(stored)
+      analysis.skillConfidenceMap = skillConfidenceMap
+      analysis.adjustedReadinessScore = adjustedReadinessScore
+      localStorage.setItem(fullResultsKey, JSON.stringify(analysis))
+      
+      // Also update current analysis if it matches
+      const current = getCurrentAnalysis()
+      if (current && current.id === id) {
+        localStorage.setItem(CURRENT_ANALYSIS_KEY, JSON.stringify(analysis))
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  // Update history entry score
+  const history = getHistory()
+  const updatedHistory = history.map(entry => {
+    if (entry.id === id) {
+      return { ...entry, readinessScore: adjustedReadinessScore }
+    }
+    return entry
+  })
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory))
+}
+
+export function initializeSkillConfidenceMap(skills: string[]): SkillConfidenceMap {
+  const map: SkillConfidenceMap = {}
+  skills.forEach(skill => {
+    map[skill] = 'practice'
+  })
+  return map
 }

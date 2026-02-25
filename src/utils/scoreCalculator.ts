@@ -1,4 +1,5 @@
-import { ExtractedSkills, getDetectedCategories } from './skillExtractor'
+import { ExtractedSkills, SkillConfidenceMap } from '@/types/analysis'
+import { getDetectedCategories } from './skillExtractor'
 
 export function calculateReadinessScore(
   skills: ExtractedSkills,
@@ -29,6 +30,24 @@ export function calculateReadinessScore(
 
   // Cap at 100
   return Math.min(score, 100)
+}
+
+export function calculateAdjustedReadinessScore(
+  baseScore: number,
+  skillConfidenceMap: SkillConfidenceMap
+): number {
+  let adjustedScore = baseScore
+
+  Object.values(skillConfidenceMap).forEach(confidence => {
+    if (confidence === 'know') {
+      adjustedScore += 2
+    } else {
+      adjustedScore -= 2
+    }
+  })
+
+  // Bounds: 0-100
+  return Math.max(0, Math.min(100, adjustedScore))
 }
 
 export function getScoreLabel(score: number): string {
